@@ -1,0 +1,7 @@
+{
+    "diseases":[
+        {"NO":0,"NAME":"Gradable"},
+        {"NO":1,"NAME":"Ungradable"}
+    ]
+}
+

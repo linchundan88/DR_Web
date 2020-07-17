@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Analysis results</title>
+    <style type="text/css">
+        .font0{font-size:larger;color:#000000}
+        .font1{font-size:large;color:#FF0000}
+        .font3{font-size:large;color:#0000FF}
+    </style>
+
+    <script type="text/javascript">
+        function submitBtnClick(){
+            var formElement = document.forms[0];
+            formElement.submit();
+    }
+    </script>
+</head>
+<body>
+
+    <p></p>
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    <a href="/uploadimage">Analyze fundus images</a>
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    <a href="/view_diagnoses">Historical analysis results </a>
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    <a href="/logout">logout</a>
+    <p></p>
+
+
+    <table border="1">
+        <tr>
+            <td class="font0" align="center">Original image</td>
+            <td class="font0" align="center">Preprocessed image</td>
+            <td class="font0" align="center">Image quality</td>
+        </tr>
+        <tr>
+            <td>
+                <img src={{ predict_result.img_file_resized_384 }}  height="299" width="299" alt="">
+            </td>
+            <td>
+                <img src={{ predict_result['img_file_preprocessed_384'] }}  height="299" width="299" alt="">
+            </td>
+            <td width="299" align="center">
+                {% if  predict_result['img_gradable'] == 0 %}
+                    <span style="color: #302fff">Gradable</span>
+                    <br><br>(probability of gradable: {{ predict_result['img_gradable_0_prob'] |my_round}} %)
+                {% elif predict_result['img_gradable'] == 1 %}
+                    <span style="color: #FF0000;font-size:large">Ungradable</span>
+                    <br><br>(probability of ungradable: {{ predict_result['img_gradable_1_prob'] |my_round}} %)
+                {% endif %}
+
+            </td>
+        </tr>
+    </table>
+
+    <p></p>
+
+    <h3 class="font0" >Analysis results</h3>
+    {% if predict_result['detected'] != '' or predict_result['img_gradable'] == 1 %}
+        <h3 class="font1" ><span style="color: #000000">Recommendation:</span> {{ predict_result['recommended'] }}</h3>
+    {% else %}
+        <h3 class="font3" ><span style="color: #000000">Recommendation:</span> {{ predict_result['recommended'] }}</h3>
+    {% endif %}
+
+
+    {% if  predict_result['img_gradable'] == 0 %}
+        {% if 'img_left_right' in predict_result %}
+            {% if predict_result['img_left_right_0_prob'] > predict_result['img_left_right_1_prob'] %}
+                {{ predict_result['img_left_right_0_name'] }}
+            {% else %}
+                {{ predict_result['img_left_right_1_name'] }}
+            {% endif %}
+            <br>
+        {% endif %}
+
+        <table border="1">
+            <tr>
+                <td class="font0" width="300" align="center">ROP-related feature</td>
+                <td class="font0" width="125" align="center">Yes or NO</td>
+                <td class="font0" width="165" align="center">Positive probability</td>
+
+                {% if 'Heatmap_cam_dr' in predict_result %}
+                    <td class="font0" align="center">Heat-map Class Activation Map</td>
+                {% endif %}
+
+                {% if 'Heatmap_deepshap_dr' in predict_result %}
+                    <td class="font0" align="center">Heat-map DeepShap</td>
+                {% endif %}
+            </tr>
+
+            {% if 'img_dr' in predict_result %}
+                <tr>
+                    <td align="center" class="font0">
+                       {{ predict_result['img_dr_1_name'] }} ?
+                    </td>
+
+                    {% if  predict_result['img_dr'] == 0 %}
+                        <td align="center"><span class="font3">No</span></td>
+                        <td align="center"><span class="font3">{{ predict_result['img_dr_1_prob'] }} %</span></td>
+                    {% elif predict_result['img_dr'] == 1 %}
+                        <td align="center"><span class="font1">Yes</span></td>
+                        <td align="center"><span class="font1">{{ predict_result['img_dr_1_prob'] }} %</span></td>
+                    {% endif %}
+
+                {% if predict_result['img_dr'] == 1  %}
+                    <td>
+                        {% if 'Heatmap_cam_dr' in predict_result %}
+                            <img src={{ predict_result['Heatmap_cam_dr'] }}  height="299" width="299" alt="">
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if 'Heatmap_deepshap_dr' in predict_result %}
+                            <img src={{ predict_result['Heatmap_deepshap_dr'] }}  height="299" width="299" alt="">
+                        {% endif %}
+                    </td>
+                {% endif %}
+
+                </tr>
+            {% endif %}
+
+        </table>
+
+        <br>
+
+         Notes:
+        <br>
+        <br>
+        <br>
+        <br>
+
+    {% endif %}
+
+    <p> </p>
+    <p> </p>
+    <p> </p>
+    <p> </p>
+
+    {%  if realtime_diagnose %}
+    <form action="/feedback">
+         <!--<p class="font3">User feedback</p>-->
+        <p> </p>
+        <p> </p>
+        <p> </p>
+
+        <p class="font3">
+        Please rate the accuracy of the analysis results:
+
+{#        <p>Partly correct means this image with multiple diseases and AI only found out a part of these.#}
+{#        Probably wrong means you doubt the diagnostic results, but you are not sure about it.#}
+{#        </p>#}
+
+
+        <select name="score">
+          <option value="5">totally correct</option>
+          <option value="4">partly correct</option>
+          <option value="3">probably wrong</option>
+          <option value="0">absolutely wrong</option>
+        </select>
+        </p>
+
+{#        <br>#}
+        Your feedback(such as the correct diagnoses that you think, possible cause of error, etc.)
+        <br>
+        <textarea name="memo" rows="6" cols="60"></textarea>
+        <p></p>
+{#        <input type="submit" value="submit" />#}
+
+
+    </form>
+
+    <p></p>
+
+    <button onclick="submitBtnClick()">Submit</button>
+    &nbsp;&nbsp;&nbsp;
+    <button onclick="javascript:window.location.href='/uploadimage'">Return</button>
+    {% else %}
+        <button onclick="javascript:window.location.href='/view_diagnoses'">Return</button>
+    {% endif %}
+</body>
+</html>

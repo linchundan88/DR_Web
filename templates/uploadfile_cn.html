@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>欢迎使用糖尿病视网膜病变自动筛查系统</title>
+    <style type="text/css">
+        .font0{font-size:larger;color:#0000FF}
+        .font1{font-size:large;color:#FF0000}
+        .font2{font-size:large;color:#FF0000}
+        .font3{font-size:large;color:#0000FF}
+    </style>
+
+</head>
+<body>
+
+    <p></p>
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    <a href="/view_diagnoses">查看历史分析记录 </a>
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    <a href="/logout">注销</a>
+    <p></p>
+
+    <p></p>
+    <h3 class="font0">欢迎使用糖尿病视网膜病变自动筛查系统，请先点击浏览本地眼底图像文件后，然后点击按钮'上传并自动诊断'。本系统的诊断结果仅供科学研究和参考。</h3>
+
+    <form method="post" action="diagnose" enctype="multipart/form-data" >
+
+        <input type="file" name="input_image_file" /><br /><br />
+        <p></p>
+        <div style="display:block;">
+
+{#        <input type="checkbox" name="showcam" value="1" checked="checked"  >显示AI热力图#}
+        </div>
+
+        <p><input type="submit" value="上传并自动分析"/></p>
+    </form>
+
+    <p></p>
+
+
+</body>
+</html>

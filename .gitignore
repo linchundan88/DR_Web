@@ -1,0 +1,6 @@
+.idea
+/my_module/db_config.json
+/database/dr.sqlite
+/static/imgs/
+__pycache__/
+my_module/__pycache__/

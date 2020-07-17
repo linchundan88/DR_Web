@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Analysis results</title>
+    <style type="text/css">
+        .font0{font-size:larger;color:#000000}
+        .font1{font-size:large;color:#FF0000}
+        .font3{font-size:large;color:#0000FF}
+    </style>
+
+    <script type="text/javascript">
+        function submitBtnClick(){
+            var formElement = document.forms[0];
+            formElement.submit();
+    }
+    </script>
+</head>
+<body>
+    <p></p>
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    <a href="/uploadimage">Analyze fundus images</a>
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    <a href="/view_diagnoses">Historical analysis results </a>
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    <a href="/logout">logout</a>
+    <p></p>
+
+{#    <br>#}
+
+    <table border="1">
+        <tr>
+            <td class="font0" align="center">Original image</td>
+            <td class="font0" align="center">Preprocessed image</td>
+            <td class="font0" align="center">Image quality</td>
+        </tr>
+        <tr>
+            <td>
+                <img src={{ predict_result.img_file_resized_384 }}  height="299" width="299" alt="">
+            </td>
+            <td>
+                <img src={{ predict_result.img_file_preprocessed_384 }}  height="299" width="299" alt="">
+            </td>
+            <td width="299" align="center">
+                {% if  predict_result.img_gradable == 0 %}
+                    <span style="color: #302fff">Gradable</span>
+                    <br><br>(probability of gradable: {{ predict_result.img_gradable_0_prob |my_round }} %)
+                {% elif predict_result.img_gradable == 1 %}
+                    <span style="color: #FF0000;font-size:large">Ungradable</span>
+                    <br><br>(probability of ungradable: {{ predict_result.img_gradable_1_prob |my_round}} %)
+                {% endif %}
+
+            </td>
+        </tr>
+    </table>
+
+    <p></p>
+
+{#    {% if  predict_result.img_gradable == 0 %}#}
+{#        <span style="color: #302fff">Image quality: gradable </span>#}
+{#        (probability of gradable : {{ predict_result.img_gradable_0_prob|floatformat:1 }} %)#}
+{#    {% elif predict_result.img_gradable == 1 %}#}
+{#        <span style="color: #FF0000;font-size:large">Image quality: ungradable </span>#}
+{#        (probability of ungradable : {{ predict_result.img_gradable_1_prob|floatformat:1 }} %)#}
+{#    {% endif %}#}
+{#    &nbsp;&nbsp;&nbsp;#}
+
+    <h3 class="font0" >Analysis results</h3>
+    {% if predict_result.detected != '' or predict_result.img_gradable == 1 %}
+        <h3 class="font1" ><span style="color: #000000">Recommendation:</span> {{ predict_result.recommended }}</h3>
+    {% else %}
+        <h3 class="font3" ><span style="color: #000000">Recommendation:</span> {{ predict_result.recommended }}</h3>
+    {% endif %}
+
+
+    {% if  predict_result.img_gradable == 0 %}
+        {% if 'img_left_right' in predict_result %}
+            {% if predict_result.img_left_right_0_prob > ipredict_result.mg_left_right_1_prob %}
+                {{ predict_result.img_left_right_0_name }}
+            {% else %}
+                {{ predict_result.img_left_right_1_name }}
+            {% endif %}
+            <br>
+        {% endif %}
+
+        <table border="1">
+            <tr>
+                <td class="font0" width="300" align="center">ROP-related feature</td>
+                <td class="font0" width="125" align="center">Yes or NO</td>
+                <td class="font0" width="165" align="center">Positive probability</td>
+
+                {% if predict_result.Heatmap_deepshap == 1 %}
+                    <td class="font0" align="center">Heat-map</td>
+                {% endif %}
+            </tr>
+
+            {% if 'img_stage' in predict_result %}
+                <tr>
+                    <td align="center" class="font0">
+                       {{ predict_result.img_stage_1_name }} ?
+                    </td>
+
+                    {% if  predict_result.img_stage == 0 %}
+                        <td align="center"><span class="font3">No</span></td>
+                        <td align="center"><span class="font3">{{ predict_result.img_stage_1_prob |my_round}} %</span></td>
+                    {% elif predict_result.img_stage == 1 %}
+                        <td align="center"><span class="font1">Yes</span></td>
+                        <td align="center"><span class="font1">{{ predict_result.img_stage_1_prob |my_round}} %</span></td>
+                    {% endif %}
+
+                {% if predict_result.img_stage == 1  %}
+                    <td>
+                        {% if 'Heatmap_deepshap_stage' in predict_result %}
+                            <img src={{ predict_result.Heatmap_deepshap_stage }}  height="299" width="299" alt="">
+                        {% endif %}
+                    </td>
+                {% endif %}
+
+                </tr>
+            {% endif %}
+
+
+            {% if 'img_hemorrhage' in predict_result %}
+                <tr>
+                    <td align="center" class="font0">
+                       {{ predict_result.img_hemorrhage_1_name }} ?
+                    </td>
+                    {% if  predict_result.img_hemorrhage == 0 %}
+                        <td align="center"><span class="font3">No</span></td>
+                        <td align="center"><span class="font3">{{ predict_result.img_hemorrhage_1_prob |my_round}} %</span></td>
+
+                    {% elif predict_result.img_hemorrhage == 1 %}
+                        <td align="center"><span class="font1">Yes</span></td>
+                        <td align="center"><span class="font1">{{ predict_result.img_hemorrhage_1_prob |my_round}} %</span></td>
+
+                    {% endif %}
+
+                {% if predict_result.img_hemorrhage == 1  %}
+                    <td>
+                        {% if 'Heatmap_deepshap_hemorrhage' in predict_result %}
+                            <img src={{ predict_result.Heatmap_deepshap_hemorrhage }}  height="299" width="299" alt="">
+                        {% endif %}
+                    </td>
+                {% endif %}
+
+                </tr>
+            {% endif %}
+
+            {% if 'img_posterior' in predict_result %}
+                <tr>
+                    <td align="center" class="font0">
+                    {{ predict_result.img_posterior_0_name }} ?
+                    </td>
+
+                    {% if  predict_result.img_posterior == 1 %}
+
+                        <td align="center"><span class="font3">No</span></td>
+                        <td align="center"><span class="font3">{{ predict_result.img_posterior_0_prob |my_round}} %</span></td>
+
+                    {% elif predict_result.img_posterior == 0 %}
+
+                        <td align="center"><span class="font1">Yes</span></td>
+                        <td align="center"><span class="font1">{{ predict_result.img_posterior_0_prob |my_round}} %</span></td>
+
+                    {% endif %}
+                </tr>
+            {% endif %}
+
+            {% if 'img_plus' in predict_result %}
+                <tr>
+                    <td align="center" class="font0">
+                    {{ predict_result.img_plus_1_name }} ?
+                    </td>
+
+                    {% if  predict_result.img_plus == 0 %}
+
+                        <td align="center"><span class="font3">No</span></td>
+                        <td align="center"><span class="font3">{{ predict_result.img_plus_1_prob |my_round}} %</span></td>
+
+                    {% elif predict_result.img_plus == 1 %}
+
+                        <td align="center"><span class="font1">Yes</span></td>
+                        <td align="center"><span class="font1">{{ predict_result.img_plus_1_prob |my_round}} %</span></td>
+
+                    {% endif %}
+
+                {% if predict_result.Heatmap_deepshap_plus == 1 %}
+                    <td>
+                        {% if 'Heatmap_deepshap_plus' in predict_result %}
+                            <img src={{ predict_result.Heatmap_deepshap_plus }}  height="299" width="299" alt="">
+                        {% endif %}
+                    </td>
+                {% endif %}
+
+                </tr>
+            {% endif %}
+
+        </table>
+
+         Notes:
+        <br>
+1) Pre-defined threshold of probablitiy is 50%, if probablitiy >=50%, the prediction by platform is positive,  else,  negative.
+        <br>
+2) Posterior reina criteria:  In our study, posterior retina is a circle which centered the center of optic disc (OD) with radius as three times of the
+        <br>&nbsp;&nbsp;&nbsp;&nbsp;diameter of the OD. The standard posterior retina area  fits for pre-plus/plus disease evaluation in our platform.
+
+        <br>
+        <br>
+        {% if 'img_posterior' in predict_result and predict_result.img_posterior == 0  %}
+            <table border="1">
+                <tr>
+                    {% if 'filename_optic_disc_mask' in predict_result %}
+                        <td class="font0" align="center">Optic disc segmentation</td>
+                    {% endif %}
+                    {% if 'filename_draw_circle' in predict_result %}
+                        <td class="font0" align="center">Posterior region</td>
+                    {% endif %}
+                    {% if 'blood_vessel_seg_file' in predict_result %}
+                        <td class="font0" align="center">Blood vessel segmentation</td>
+                    {% endif %}
+                    {% if 'filename_blood_vessel_seg_posterior' in predict_result %}
+                        <td class="font0" align="center">Posterior blood vessel</td>
+                    {% endif %}
+                </tr>
+
+                <tr>
+                    {% if predict_result.img_posterior == 0  %}
+                        <td>
+                            {% if 'filename_optic_disc_mask' in predict_result %}
+                                <img src={{ predict_result.filename_optic_disc_mask }}  height="200" width="200" alt="">
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if 'filename_draw_circle' in predict_result %}
+                                <img src={{ predict_result.filename_draw_circle }}  height="200" width="200" alt="">
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if 'blood_vessel_seg_file' in predict_result %}
+                                <img src={{ predict_result.blood_vessel_seg_file }}  height="200" width="200" alt="">
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if 'filename_blood_vessel_seg_posterior' in predict_result %}
+                                <img src={{ predict_result.filename_blood_vessel_seg_posterior }}  height="200" width="200" alt="">
+                            {% endif %}
+                        </td>
+                    {% endif %}
+
+                </tr>
+            </table>
+        {% endif %}
+
+    {% endif %}
+
+    <p> </p>
+    <p> </p>
+    <p> </p>
+    <p> </p>
+
+    {%  if realtime_diagnose %}
+    <form action="/feedback">
+         <!--<p class="font3">User feedback</p>-->
+        <p> </p>
+        <p> </p>
+        <p> </p>
+
+        <p class="font3">
+        Please rate the accuracy of the analysis results:
+
+{#        <p>Partly correct means this image with multiple diseases and AI only found out a part of these.#}
+{#        Probably wrong means you doubt the diagnostic results, but you are not sure about it.#}
+{#        </p>#}
+
+
+        <select name="score">
+          <option value="5">totally correct</option>
+          <option value="4">partly correct</option>
+          <option value="3">probably wrong</option>
+          <option value="0">absolutely wrong</option>
+        </select>
+        </p>
+
+{#        <br>#}
+        Your feedback(such as the correct diagnoses that you think, possible cause of error, etc.)
+        <br>
+        <textarea name="memo" rows="6" cols="60"></textarea>
+        <p></p>
+{#        <input type="submit" value="submit" />#}
+
+
+    </form>
+
+    <p></p>
+
+    <button onclick="submitBtnClick()">Submit</button>
+    &nbsp;&nbsp;&nbsp;
+    <button onclick="javascript:window.location.href='/uploadimage'">Return</button>
+    {% else %}
+        <button onclick="javascript:window.location.href='/view_diagnoses'">Return</button>
+    {% endif %}
+</body>
+</html>

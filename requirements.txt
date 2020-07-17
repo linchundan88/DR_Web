@@ -1,0 +1,7 @@
+flask>=1.1.2
+imgaug>=0.2.6
+#sqllite or mysql
+#mysqlclient==1.4.6
+numpy>=1.15.4
+opencv-python>=3.4.2.17
+

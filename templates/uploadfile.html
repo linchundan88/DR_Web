@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Welcome to Diabetic Retinopathy screening system</title>
+    <style type="text/css">
+        .font0{font-size:larger;color:#0000FF}
+        .font1{font-size:large;color:#FF0000}
+        .font2{font-size:large;color:#FF0000}
+        .font3{font-size:large;color:#0000FF}
+    </style>
+
+</head>
+<body>
+
+    <p></p>
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    <a href="/view_diagnoses">View historical diagnostic results</a>
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    <a href="/logout">logout</a>
+    <p></p>
+
+    <p></p>
+    <h3 class="font0">
+        Welcome to ROP screening analysis system, please upload a fundus image, and click the button 'Analyse'.</h3>
+
+
+    <form method="post" action="diagnose" enctype="multipart/form-data" >
+
+        <input type="file" value="upload"  name="input_image_file" /><br /><br />
+        <p></p>
+        <div style="display:block;">
+
+{#        <input type="checkbox" name="showcam" value="1" checked="checked" >Show heatmaps(Class Activation Maps)#}
+        </div>
+
+        <p><input type="submit" value="Analyse"/></p>
+    </form>
+
+    <p></p>
+
+
+</body>
+</html>

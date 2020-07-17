@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>分析结果</title>
+    <style type="text/css">
+        .font0{font-size:larger;color:#000000}
+        .font1{font-size:large;color:#FF0000}
+        .font3{font-size:large;color:#0000FF}
+    </style>
+
+    <script type="text/javascript">
+        function submitBtnClick(){
+            var formElement = document.forms[0];
+            formElement.submit();
+    }
+    </script>
+</head>
+<body>
+    <p></p>
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    <a href="/uploadimage">分析诊断眼底图像</a>
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    <a href="/view_diagnoses">查看历史分析结果 </a>
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    <a href="/logout">logout</a>
+    <p></p>
+
+    <table border="1">
+        <tr>
+            <td class="font0" align="center">原始图像</td>
+            <td class="font0" align="center">预处理后的图像</td>
+            <td class="font0" align="center">图像质量</td>
+        </tr>
+        <tr>
+            <td>
+                <img src={{ predict_result.img_file_resized_384 }}  height="299" width="299" alt="">
+            </td>
+            <td>
+                <img src={{ predict_result.img_file_preprocessed_384 }}  height="299" width="299" alt="">
+            </td>
+            <td width="299" align="center">
+                {% if  predict_result.img_gradable == 0 %}
+                    <span style="color: #302fff">图像质量: 可以评级</span>
+                    <br><br>(probability of gradable: {{ predict_result.img_gradable_0_prob |my_round}} %)
+                {% elif predict_result.img_gradable == 1 %}
+                    <span style="color: #FF0000;font-size:large">图像质量: 不可评级</span>
+                    <br><br>(probability of ungradable: {{ predict_result.img_gradable_1_prob |my_round}} %)
+                {% endif %}
+
+            </td>
+        </tr>
+    </table>
+
+    <p></p>
+
+{#    {% if  predict_result.img_gradable == 0 %}#}
+{#        <span style="color: #302fff">Image quality: gradable </span>#}
+{#        (probability of gradable : {{ predict_result.img_gradable_0_prob|floatformat:1 }} %)#}
+{#    {% elif predict_result.img_gradable == 1 %}#}
+{#        <span style="color: #FF0000;font-size:large">Image quality: ungradable </span>#}
+{#        (probability of ungradable : {{ predict_result.img_gradable_1_prob|floatformat:1 }} %)#}
+{#    {% endif %}#}
+{#    &nbsp;&nbsp;&nbsp;#}
+
+    <h3 class="font0" >Analysis results</h3>
+    {% if predict_result.detected != '' or predict_result.img_gradable == 1 %}
+        <h3 class="font1" ><span style="color: #000000">建议:</span> {{ predict_result.recommended }}</h3>
+    {% else %}
+        <h3 class="font3" ><span style="color: #000000">建议:</span> {{ predict_result.recommended }}</h3>
+    {% endif %}
+
+    {% if  predict_result.img_gradable == 0 %}
+        {% if 'img_left_right' in predict_result %}
+            {% if predict_result.img_left_right_0_prob > predict_result.img_left_right_1_prob %}
+                {{ predict_result.img_left_right_0_name }}
+            {% else %}
+                {{ predict_result.img_left_right_1_name }}
+            {% endif %}
+            <br>
+        {% endif %}
+
+        <table border="1">
+            <tr>
+                <td class="font0" width="300" align="center">ROP-related feature</td>
+                <td class="font0" width="125" align="center">是或否</td>
+                <td class="font0" width="165" align="center">阳性概率</td>
+
+                {% if 'Heatmap_cam_dr' in predict_result %}
+                    <td class="font0" align="center">热力图 Class Activation Map</td>
+                {% endif %}
+                {% if 'Heatmap_deepshap_dr' in predict_result %}
+                    <td class="font0" align="center">热力图 DeepShap</td>
+                {% endif %}
+            </tr>
+
+            {% if 'img_dr' in predict_result %}
+                <tr>
+                    <td align="center" class="font0">
+                       {{ predict_result.img_dr_1_name }} ?
+                    </td>
+
+                    {% if  predict_result.img_dr == 0 %}
+                        <td align="center"><span class="font3">否</span></td>
+                        <td align="center"><span class="font3">{{ predict_result.img_dr_1_prob |my_round }} %</span></td>
+                    {% elif predict_result.img_dr == 1 %}
+                        <td align="center"><span class="font1">是</span></td>
+                        <td align="center"><span class="font1">{{ predict_result.img_dr_1_prob |my_round }} %</span></td>
+                    {% endif %}
+
+                {% if predict_result.img_dr == 1  %}
+                    <td>
+                        {% if 'Heatmap_cam_dr' in predict_result %}
+                            <img src={{ predict_result['Heatmap_cam_dr'] }}  height="299" width="299" alt="">
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if 'Heatmap_deepshap_dr' in predict_result %}
+                            <img src={{ predict_result.Heatmap_deepshap_dr }}  height="299" width="299" alt="">
+                        {% endif %}
+                    </td>
+                {% endif %}
+
+                </tr>
+            {% endif %}
+
+        </table>
+
+        <br>
+        <br>
+        <br>
+        <br>
+
+    {% endif %}
+
+    <p> </p>
+    <p> </p>
+    <p> </p>
+    <p> </p>
+
+    {%  if realtime_diagnose %}
+    <form action="/feedback">
+         <!--<p class="font3">User feedback</p>-->
+        <p> </p>
+        <p> </p>
+        <p> </p>
+
+        <p class="font3">
+        请对以上分析结果进行评价:
+
+{#        <p>Partly correct means this image with multiple diseases and AI only found out a part of these.#}
+{#        Probably wrong means you doubt the diagnostic results, but you are not sure about it.#}
+{#        </p>#}
+
+
+        <select name="score">
+          <option value="5">完全正确</option>
+          <option value="4">部分正确</option>
+          <option value="3">可能错误</option>
+          <option value="0">完全错误</option>
+        </select>
+        </p>
+
+{#        <br>#}
+        您的反馈建议（例如您认为的正确分析结果，AI分析错误的可能原因等）
+        <br>
+        <textarea name="memo" rows="6" cols="60"></textarea>
+        <p></p>
+{#        <input type="submit" value="submit" />#}
+
+    </form>
+
+    <p></p>
+
+    <button onclick="submitBtnClick()">Submit</button>
+    &nbsp;&nbsp;&nbsp;
+    <button onclick="javascript:window.location.href='/uploadimage'">返回</button>
+    {% else %}
+        <button onclick="javascript:window.location.href='/view_diagnoses'">返回</button>
+    {% endif %}
+</body>
+</html>
